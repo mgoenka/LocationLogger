@@ -35,5 +35,12 @@
         android:textSize="24sp"
         android:textColor="@color/red">
     </TextView>
+
+        <Button
+            android:id="@+id/btnLocationFetcher"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onFetchLocation"
+            android:text="Fetch Location" />
     
 </LinearLayout>

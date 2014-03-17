@@ -19,10 +19,11 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 public class LocationLoggerActivity extends Activity {
-	private static final long MEASURE_TIME = 1000 * 30;
+	private static final long MEASURE_TIME = 1000 * 1;
 	private static final long POLLING_FREQ = 1000 * 1;
 	private static final float MIN_DISTANCE = 0.5f;
 	
@@ -43,9 +44,10 @@ public class LocationLoggerActivity extends Activity {
 	private LocationListener mLocationListener;
 
 	private final String TAG = "Edx";
-
 	private boolean mFirstUpdate = true;
-
+	String wifi = "";
+	String fileName = "/sdcard/edx.log";
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -56,36 +58,28 @@ public class LocationLoggerActivity extends Activity {
 		mTimeView = (TextView) findViewById(R.id.time_view);
 		mLatView = (TextView) findViewById(R.id.lat_view);
 		mLngView = (TextView) findViewById(R.id.lng_view);
+		
+		LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+		boolean gps_on = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		
+		fileName += (gps_on ? "GPS" : "") + wifi + 1 + (int)(Math.random() * 1000)  + ".txt";
+
 
 		// Acquire reference to the LocationManager
 		if (null == (mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE)))
 			finish();
-
-		// Get best last location measurement
-		mBestReading = lastKnownLocation();
-
-		// Display last reading information
-		if (null != mBestReading) {
-			updateDisplay(mBestReading);
-		} else {
-			mAccuracyView.setText("No Initial Reading Available");
-		}
+		
+		updateLocation();
 
 		mLocationListener = new LocationListener() {
 			// Called back when location changes
 			public void onLocationChanged(Location location) {
 				ensureColor();
-				// Determine whether new location is better than current best
-				// estimate
-				if (null == mBestReading
-						|| location.getAccuracy() < mBestReading.getAccuracy()) {
+				// Update best estimate
+				mBestReading = location;
 
-					// Update best estimate
-					mBestReading = location;
-
-					// Update display
-					updateDisplay(location);
-				}
+				// Update display
+				updateDisplay(location);
 			}
 
 			public void onStatusChanged(String provider, int status,
@@ -101,6 +95,22 @@ public class LocationLoggerActivity extends Activity {
 				// NA
 			}
 		};
+	}
+	
+	public void onFetchLocation(View v) {
+		updateLocation();
+	}
+	
+	public void updateLocation() {
+		// Get best last location measurement
+		mBestReading = lastKnownLocation();
+
+		// Display last reading information
+		if (null != mBestReading) {
+			updateDisplay(mBestReading);
+		} else {
+			mAccuracyView.setText("No Initial Reading Available");
+		}
 	}
 
 	@Override
@@ -139,7 +149,6 @@ public class LocationLoggerActivity extends Activity {
 	// Get the last known location from all providers
 	// return best reading is as accurate as minAccuracy and
 	// was taken no longer then minTime milliseconds ago
-
 	private Location lastKnownLocation() {
 		Location bestResult = null;
 
@@ -172,7 +181,7 @@ public class LocationLoggerActivity extends Activity {
 	}
 	
 	public void appendLog(String text) {       
-	   File logFile = new File("/sdcard/edx.log");
+	   File logFile = new File(fileName);
 	   if (!logFile.exists()) {
 	      try {
 	         logFile.createNewFile();
