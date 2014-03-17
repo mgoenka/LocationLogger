@@ -45,8 +45,7 @@ public class LocationLoggerActivity extends Activity {
 
 	private final String TAG = "Edx";
 	private boolean mFirstUpdate = true;
-	String wifi = "";
-	String fileName = "/sdcard/edx.log";
+	String fileName = "/sdcard/Location";
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -59,10 +58,7 @@ public class LocationLoggerActivity extends Activity {
 		mLatView = (TextView) findViewById(R.id.lat_view);
 		mLngView = (TextView) findViewById(R.id.lng_view);
 		
-		LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-		boolean gps_on = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-		
-		fileName += (gps_on ? "GPS" : "") + wifi + 1 + (int)(Math.random() * 1000)  + ".txt";
+		fileName += 1 + (int)(Math.random() * 1000)  + ".txt";
 
 
 		// Acquire reference to the LocationManager
